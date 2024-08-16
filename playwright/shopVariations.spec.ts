@@ -8,6 +8,9 @@ variations.forEach((location) => {
   test(`Testing properties variation at ${url}`, async ({ page }) => {
     await page.goto(url);
 
+    await page.waitForSelector('#onetrust-banner-sdk', { state: 'visible' });
+    await page.click('#onetrust-accept-btn-handler');
+
     // Verify the title of the page
     const expectedSubstring = "Engel & Völkers";
     const actualTitle = await page.title();
@@ -32,11 +35,12 @@ variations.forEach((location) => {
   test(`Testing advisors variation at ${url}`, async ({ page }) => {
     await page.goto(url);
 
-    // Verify Advisor link is working
-    await page.click('[data-test-id="our-advisors"]');
-
     await page.waitForSelector('#onetrust-banner-sdk', { state: 'visible' });
     await page.click('#onetrust-accept-btn-handler');
+
+    // Verify Advisor link is working
+    await page.click('[data-test-id="our-advisors"]');
+    await page.waitForSelector('[data-test-id^="advisor-card-styled-card-container"]');
 
     const container = page.locator(
       '[data-test-id="advisor-card-styled-card-container"]'
