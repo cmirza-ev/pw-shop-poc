@@ -27,5 +27,18 @@ variations.forEach((location) => {
     const count = await cardWrappers.count();
 
     expect(count).toBeGreaterThan(1);
+
+    // Verify Advisor link is working
+    await page.click('[data-test-id="our-advisors"]');
+
+    const adv_container = page.locator(
+      '[data-test-id="advisor-card-styled-card-container"]'
+    );
+    const adv_cardWrappers = container.locator(
+      '[data-test-id^="advisor-card-card-wrapper-"]'
+    );
+    const adv_count = await cardWrappers.count();
+
+    expect(count).toBeGreaterThan(1);
   });
 });
