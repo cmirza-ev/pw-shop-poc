@@ -5,7 +5,7 @@ const variations = ["atlanta"];
 variations.forEach((location) => {
   const url = `https://${location}.evrealestate.com`;
 
-  test(`Testing variation at ${url}`, async ({ page }) => {
+  test(`Testing properties variation at ${url}`, async ({ page }) => {
     await page.goto(url);
 
     // Verify the title of the page
@@ -27,18 +27,27 @@ variations.forEach((location) => {
     const count = await cardWrappers.count();
 
     expect(count).toBeGreaterThan(1);
+  });
+
+  test(`Testing advisors variation at ${url}`, async ({ page }) => {
+    await page.goto(url);
 
     // Verify Advisor link is working
     await page.click('[data-test-id="our-advisors"]');
 
-    const adv_container = page.locator(
+    await page.waitForSelector('#onetrust-banner-sdk', { state: 'visible' });
+    await page.click('#onetrust-accept-btn-handler');
+
+    const container = page.locator(
       '[data-test-id="advisor-card-styled-card-container"]'
     );
-    const adv_cardWrappers = container.locator(
+    const cardWrappers = container.locator(
       '[data-test-id^="advisor-card-card-wrapper-"]'
     );
-    const adv_count = await cardWrappers.count();
+    const count = await cardWrappers.count();
 
     expect(count).toBeGreaterThan(1);
   });
+
+
 });
