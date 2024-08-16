@@ -19,7 +19,7 @@ $ npx playwright test
 
 To run tests with UI
 ```console
-npx playwright test --ui
+$ npx playwright test --ui
 ```
 
 ### Open Playwright Test Report
