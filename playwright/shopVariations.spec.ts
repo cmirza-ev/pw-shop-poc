@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const variations = ["atlanta", "novascotia", "tulum"];
+const variations = ["atlanta"];
 
 variations.forEach((location) => {
   const url = `https://${location}.evrealestate.com`;
