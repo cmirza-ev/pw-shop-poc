@@ -7,7 +7,7 @@ Proof of concept for shop testing with Playwright
 ### Installation
 
 ```console
-$ npm install
+$ npx playwright install
 ```
 
 ### Run Playwright Tests
