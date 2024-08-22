@@ -1,57 +1,60 @@
 import { test, expect } from "@playwright/test";
+import { fetchAndExtractShopSites } from "./shopTestUtils";
 
-const variations = ["atlanta"];
+test.describe('Shop Site Tests', () => {
+  test('Test properties and advisors for all websites', async ({ page }) => {
+    const websites = await fetchAndExtractShopSites();
+    console.log(`Total websites to test: ${websites.length}`);
 
-variations.forEach((location) => {
-  const url = `https://${location}.evrealestate.com`;
+    const dynamicTimeout = 10000 * websites.length;
+    test.setTimeout(dynamicTimeout);
 
-  test(`Testing properties variation at ${url}`, async ({ page }) => {
-    await page.goto(url);
-
-    await page.waitForSelector('#onetrust-banner-sdk', { state: 'visible' });
-    await page.click('#onetrust-accept-btn-handler');
-
-    // Verify the title of the page
-    const expectedSubstring = "Engel & Völkers";
-    const actualTitle = await page.title();
-
-    expect(actualTitle).toContain(expectedSubstring);
-
-    // Verify properties has at least one listing
-    await page.click('[data-test-id="properties"]');
-    await page.waitForSelector('[data-test-id^="property-listing-card-wrapper-"]');
-
-    const container = page.locator(
-      '[data-test-id="property-listing-styled-card-container"]'
-    );
-    const cardWrappers = container.locator(
-      '[data-test-id^="property-listing-card-wrapper-"]'
-    );
-    const count = await cardWrappers.count();
-
-    expect(count).toBeGreaterThan(1);
+    for (const url of websites) {
+      await test.step(`Testing ${url}`, async () => {
+        await testProperties(page, url);
+        await testAdvisors(page, url);
+      });
+    }
   });
-
-  test(`Testing advisors variation at ${url}`, async ({ page }) => {
-    await page.goto(url);
-
-    await page.waitForSelector('#onetrust-banner-sdk', { state: 'visible' });
-    await page.click('#onetrust-accept-btn-handler');
-
-    // Verify Advisor link is working
-    await page.click('[data-test-id="our-advisors"]');
-    await page.waitForSelector('[data-test-id^="advisor-card-styled-card-container"]');
-
-    const container = page.locator(
-      '[data-test-id="advisor-card-styled-card-container"]'
-    );
-    const cardWrappers = container.locator(
-      '[data-test-id^="advisor-card-card-wrapper-"]'
-    );
-    const count = await cardWrappers.count();
-
-    expect(count).toBeGreaterThan(1);
-  });
-
-
 });
+
+async function handleOneTrustBanner(page) {
+  try {
+    await page.waitForSelector('#onetrust-banner-sdk', { state: 'visible', timeout: 100 });
+    await page.click('#onetrust-accept-btn-handler');
+  } catch (error) {
+    // Banner not found, continue with the test
+  }
+}
+
+async function testProperties(page, url: string) {
+  await page.goto(url);
+  await page.waitForLoadState('networkidle');
+  await handleOneTrustBanner(page);
+
+  const expectedSubstring = "Engel & Völkers";
+  const actualTitle = await page.title();
+  expect(actualTitle).toContain(expectedSubstring);
+
+  await page.click('[data-test-id="properties"]');
+  await page.waitForSelector('[data-test-id^="property-listing-card-wrapper-"]');
+
+  const container = page.locator('[data-test-id="property-listing-styled-card-container"]');
+  const cardWrappers = container.locator('[data-test-id^="property-listing-card-wrapper-"]');
+  const count = await cardWrappers.count();
+  expect(count).toBeGreaterThan(1);
+}
+
+async function testAdvisors(page, url: string) {
+  await page.goto(url);
+  await page.waitForLoadState('networkidle');
+  await handleOneTrustBanner(page);
+
+  await page.click('[data-test-id="our-advisors"]');
+  await page.waitForSelector('[data-test-id^="advisor-card-styled-card-container"]');
+
+  const container = page.locator('[data-test-id="advisor-card-styled-card-container"]');
+  const cardWrappers = container.locator('[data-test-id^="advisor-card-card-wrapper-"]');
+  const count = await cardWrappers.count();
+  expect(count).toBeGreaterThan(1);
+}
