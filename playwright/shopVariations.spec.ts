@@ -1,20 +1,30 @@
 import { test, expect } from "@playwright/test";
 import { fetchAndExtractShopSites } from "./shopTestUtils";
 
-test.describe('Shop Site Tests', () => {
-  test('Test properties and advisors for all websites', async ({ page }) => {
-    const websites = await fetchAndExtractShopSites();
-    console.log(`Total websites to test: ${websites.length}`);
+let websites: string[] = [];
 
+test.describe('Shop Site Tests', () => {
+
+  // Fetch the websites before running the tests
+  test.beforeAll(async () => {
+    websites = await fetchAndExtractShopSites();
+    console.log(`Total websites to test: ${websites.length}`);
+  });
+
+  // Create a single test that iterates over all websites
+  test('Run tests for all shops', async ({ page }) => {
+    for (let index = 0; index < websites.length; index++) {
+      const url = websites[index];
+      console.log(`Running Test ${index + 1}/${websites.length} - ${url}`);
+      await testProperties(page, url);
+      await testAdvisors(page, url);
+    }
+  });
+
+  // Dynamically set the test timeout based on the number of websites
+  test.beforeEach(() => {
     const dynamicTimeout = 10000 * websites.length;
     test.setTimeout(dynamicTimeout);
-
-    for (const url of websites) {
-      await test.step(`Testing ${url}`, async () => {
-        await testProperties(page, url);
-        await testAdvisors(page, url);
-      });
-    }
   });
 });
 
